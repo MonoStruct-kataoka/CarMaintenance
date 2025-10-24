@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整備記録検索 - 特定整備記録簿システム</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .new-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .new-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(76,175,80,0.4);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .search-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .search-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .input-field {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b35 0%, #f44336 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .results-count {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table thead {
+            background: #f8f9fa;
+        }
+
+        .results-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .results-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table tbody tr {
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .results-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-draft {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-archived {
+            background: #f5f5f5;
+            color: #9e9e9e;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-right: 5px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: #2196F3;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            margin: 0 5px;
+            transition: color 0.3s;
+        }
+
+        .action-btn:hover {
+            color: #1976D2;
+        }
+
+        .action-btn.delete {
+            color: #f44336;
+        }
+
+        .action-btn.delete:hover {
+            color: #d32f2f;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading i {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            /* ヘッダー */
+            .header {
+                padding: 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .header-left {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .new-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+
+            /* メインコンテンツ */
+            .main-content {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+
+            /* 検索カード */
+            .search-card {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .search-header {
+                font-size: 18px;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .input-label {
+                font-size: 13px;
+            }
+
+            .input-field {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .search-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+                justify-content: center;
+                font-size: 15px;
+            }
+
+            /* 結果カード */
+            .results-card {
+                padding: 20px 15px;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .results-title {
+                font-size: 18px;
+            }
+
+            .results-count {
+                font-size: 13px;
+            }
+
+            /* テーブル表示をカード表示に変更 */
+            .results-table {
+                display: block;
+                font-size: 13px;
+            }
+
+            .results-table thead {
+                display: none;
+            }
+
+            .results-table tbody {
+                display: block;
+            }
+
+            .results-table tr {
+                display: block;
+                margin-bottom: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 12px;
+                background: white;
+            }
+
+            .results-table td {
+                display: block;
+                padding: 8px 0;
+                border-bottom: none;
+                text-align: left;
+            }
+
+            .results-table td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                display: inline-block;
+                width: 100px;
+                color: #666;
+                font-size: 12px;
+            }
+
+            .status-badge {
+                display: inline-block;
+                margin-top: 3px;
+            }
+
+            .tag {
+                display: inline-block;
+                margin: 2px 3px 2px 0;
+            }
+
+            .action-btn {
+                font-size: 16px;
+                margin: 0 8px;
+            }
+
+            /* 空状態 */
+            .empty-state {
+                padding: 40px 20px;
+            }
+
+            .empty-state i {
+                font-size: 48px;
+            }
+
+            .empty-state h3 {
+                font-size: 18px;
+            }
+
+            .empty-state p {
+                font-size: 14px;
+            }
+        }
+
+        /* 極小画面 */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .search-header,
+            .results-title {
+                font-size: 16px;
+            }
+
+            .action-btn {
+                margin: 0 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="back-btn" onclick="location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>🔍 整備記録検索</h1>
+            </div>
+            <button class="new-btn" onclick="location.href='inspection.html'">
+                <i class="fas fa-plus"></i> 新規点検入力
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- 検索フォーム -->
+        <div class="search-card">
+            <div class="search-header">
+                <i class="fas fa-search"></i>
+                検索条件
+            </div>
+            <div class="search-form">
+                <div class="input-group">
+                    <label class="input-label">顧客名</label>
+                    <input type="text" class="input-field" id="search-client-name" placeholder="部分一致で検索">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">車両番号</label>
+                    <input type="text" class="input-field" id="search-registration" placeholder="例：四谷 330 せ">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">車台番号</label>
+                    <input type="text" class="input-field" id="search-chassis" placeholder="部分一致で検索">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">ステータス</label>
+                    <select class="input-field" id="search-status">
+                        <option value="">すべて</option>
+                        <option value="draft">下書き</option>
+                        <option value="completed">完了</option>
+                        <option value="archived">アーカイブ</option>
+                    </select>
+                </div>
+            </div>
+            <div class="search-actions">
+                <button class="btn btn-secondary" onclick="clearSearch()">
+                    <i class="fas fa-redo"></i> クリア
+                </button>
+                <button class="btn btn-primary" onclick="searchRecords()">
+                    <i class="fas fa-search"></i> 検索
+                </button>
+            </div>
+        </div>
+
+        <!-- 検索結果 -->
+        <div class="results-card">
+            <div class="results-header">
+                <div class="results-title">検索結果</div>
+                <div class="results-count" id="results-count">0 件</div>
+            </div>
+
+            <div id="loading-state" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <p>読み込み中...</p>
+            </div>
+
+            <div id="empty-state" class="empty-state">
+                <i class="fas fa-folder-open"></i>
+                <h3>整備記録がありません</h3>
+                <p>検索条件を変更するか、新しい点検記録を作成してください。</p>
+            </div>
+
+            <div id="results-container" style="display: none;">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>点検日</th>
+                            <th>顧客名</th>
+                            <th>車両番号</th>
+                            <th>車名</th>
+                            <th>走行距離</th>
+                            <th>ステータス</th>
+                            <th>タグ</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api-helper.js"></script>
+    <script src="js/search.js"></script>
+</body>
+</html>

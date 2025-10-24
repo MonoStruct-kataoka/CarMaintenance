@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整備記録簿入力 - 特定整備記録簿システム</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/inspection.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <div class="header-left">
+                <button class="back-btn" onclick="location.href='index.html'">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="header-title">
+                    <span>🔧</span>
+                    <span id="section-title">整備記録簿入力</span>
+                </div>
+            </div>
+            <div class="header-info">
+                <button class="search-shortcut-btn" onclick="location.href='search.html'" title="整備記録検索">
+                    <i class="fas fa-search"></i>
+                    <span>検索</span>
+                </button>
+                <div class="vehicle-number" id="vehicle-display">未登録</div>
+                <div class="progress-badge">
+                    <span id="progress-text">0 / 0 完了</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- タブナビゲーション -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="vehicle">
+                <span class="tab-text">車両情報</span>
+            </button>
+            <button class="tab-btn" data-tab="engine">
+                <span class="tab-text">エンジンルーム</span>
+                <span class="tab-badge">0/5</span>
+            </button>
+            <button class="tab-btn" data-tab="interior">
+                <span class="tab-text">室内点検</span>
+                <span class="tab-badge">0/3</span>
+            </button>
+            <button class="tab-btn" data-tab="undercarriage">
+                <span class="tab-text">足廻り点検</span>
+                <span class="tab-badge">0/3</span>
+            </button>
+            <button class="tab-btn" data-tab="bottom">
+                <span class="tab-text">下廻り点検</span>
+                <span class="tab-badge">0/2</span>
+            </button>
+            <button class="tab-btn" data-tab="additional">
+                <span class="tab-text">追加項目</span>
+            </button>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="main-content" id="main-content">
+            <!-- 車両情報入力 -->
+            <div class="tab-content active" data-content="vehicle">
+                <div class="vehicle-info-container">
+                    <div class="vehicle-info-grid">
+                        <div class="info-card">
+                            <div class="info-card-header">📋 基本情報</div>
+                            <button class="qr-scan-button" onclick="scanQRCode()">
+                                <span>📷</span>
+                                <span>車検証QRコードをスキャン</span>
+                            </button>
+                            <div class="input-group">
+                                <label class="input-label">依頼者の氏名又は名称 <span class="required">*</span></label>
+                                <input type="text" class="input-field" id="client-name" placeholder="例：有限会社アルプス">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">自動車登録番号又は車両番号 <span class="required">*</span></label>
+                                <input type="text" class="input-field" id="registration-number" placeholder="例：四谷 330 せ 6098">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">車名及び型式</label>
+                                <input type="text" class="input-field" id="car-model" placeholder="例：GAA-SNT33">
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-header">🚗 詳細情報</div>
+                            <div class="input-group">
+                                <label class="input-label">車台番号</label>
+                                <input type="text" class="input-field" id="chassis-number" placeholder="例：SNT33-028686">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">原動機の型式</label>
+                                <input type="text" class="input-field" id="engine-model" placeholder="例：MA03">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">初度登録年月又は初度検査年月</label>
+                                <input type="text" class="input-field" id="first-registration" placeholder="例：令和6年3月">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">走行距離（km） <span class="required">*</span></label>
+                                <input type="number" class="input-field" id="mileage" placeholder="例：76296">
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-header">🏢 整備情報</div>
+                            <div class="input-group">
+                                <label class="input-label">事業場の名称・所在地</label>
+                                <input type="text" class="input-field" id="workshop-name" value="株式会社日産サティオ埼玉北 寄居サービス工場" readonly style="background: #f3f4f6;">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">点検の年月日 <span class="required">*</span></label>
+                                <input type="date" class="input-field" id="inspection-date">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">整備完了年月日</label>
+                                <input type="date" class="input-field" id="completion-date">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">整備責任者の氏名</label>
+                                <input type="text" class="input-field" id="mechanic-name" value="田中 太郎" readonly style="background: #f3f4f6;">
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-header">🏷️ タグ設定</div>
+                            <div class="input-group">
+                                <label class="input-label">タグ（カンマ区切りで複数入力可能）</label>
+                                <input type="text" class="input-field" id="tags" placeholder="例：1年点検,オイル交換,タイヤ交換">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- エンジンルーム点検 -->
+            <div class="tab-content" data-content="engine">
+                <div class="inspection-grid" id="engine-items"></div>
+            </div>
+
+            <!-- 室内点検 -->
+            <div class="tab-content" data-content="interior">
+                <div class="inspection-grid" id="interior-items"></div>
+            </div>
+
+            <!-- 足廻り点検 -->
+            <div class="tab-content" data-content="undercarriage">
+                <div class="inspection-grid" id="undercarriage-items"></div>
+            </div>
+
+            <!-- 下廻り点検 -->
+            <div class="tab-content" data-content="bottom">
+                <div class="inspection-grid" id="bottom-items"></div>
+            </div>
+
+            <!-- 追加項目 -->
+            <div class="tab-content" data-content="additional">
+                <!-- 主な交換部品 -->
+                <div class="section-card">
+                    <h3 class="section-header">🔄 主な交換部品等</h3>
+                    <div class="replacement-grid" id="replacement-parts"></div>
+                </div>
+
+                <!-- メンテナンスアドバイス -->
+                <div class="section-card">
+                    <h3 class="section-header">💡 メンテナンスに関するアドバイス</h3>
+                    <textarea class="advice-textarea" id="advice" placeholder="次回の点検時期や交換推奨部品など、お客様へのアドバイスを記入してください。"></textarea>
+                </div>
+
+                <!-- 測定値 -->
+                <div class="section-card">
+                    <h3 class="section-header">📏 測定値</h3>
+                    <div class="measurement-grid" id="measurements"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- フローティングボタン -->
+        <div class="floating-actions">
+            <button class="fab fab-secondary" onclick="saveAsDraft()">
+                <i class="fas fa-save"></i> 下書き保存
+            </button>
+            <button class="fab fab-primary" onclick="completeInspection()">
+                <i class="fas fa-check"></i> 完了
+            </button>
+        </div>
+
+        <!-- 記号説明パネル -->
+        <div class="legend-panel" id="legendPanel">
+            <button class="legend-toggle" onclick="toggleLegend()">
+                <i class="fas fa-book"></i>
+            </button>
+            <div class="legend-title">点検記号の説明</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #4CAF50;">✓</div>
+                    <div class="legend-text">点検良好</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #f44336;">×</div>
+                    <div class="legend-text">交換</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #ff9800;">A</div>
+                    <div class="legend-text">調整</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #2196F3;">C</div>
+                    <div class="legend-text">清掃</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #9c27b0;">P</div>
+                    <div class="legend-text">省略</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #795548;">○</div>
+                    <div class="legend-text">特定整備</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #607d8b;">△</div>
+                    <div class="legend-text">修理</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #009688;">T</div>
+                    <div class="legend-text">締付</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #00BCD4;">L</div>
+                    <div class="legend-text">給油(水)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #9e9e9e;">／</div>
+                    <div class="legend-text">該当なし</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- トースト通知 -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <!-- 写真モーダル -->
+    <div class="modal" id="photoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="photoModalTitle">写真管理</h3>
+                <button class="modal-close" onclick="closePhotoModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="photo-upload-area">
+                    <input type="file" id="photoInput" accept="image/*" multiple capture="environment" style="display: none;">
+                    <button class="photo-upload-btn" onclick="document.getElementById('photoInput').click()">
+                        <i class="fas fa-camera"></i> 写真を撮影 / アップロード
+                    </button>
+                </div>
+                <div class="photo-gallery" id="photoGallery"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api-helper.js"></script>
+    <script src="js/inspection-data.js"></script>
+    <script src="js/inspection.js"></script>
+</body>
+</html>

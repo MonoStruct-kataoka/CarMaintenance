@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>帳票出力 - 特定整備記録簿システム</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .output-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .qr-preview {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .qr-preview canvas {
+            max-width: 200px;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .qr-url {
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .output-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option-item label {
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading i {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .note {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            /* ヘッダー */
+            .header {
+                padding: 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            /* メインコンテンツ */
+            .main-content {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+
+            /* 出力カード */
+            .output-card {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+
+            .card-header {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            /* 情報セクション */
+            .info-section {
+                padding: 15px;
+            }
+
+            .info-row {
+                padding: 8px 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 3px;
+            }
+
+            .info-label {
+                font-size: 13px;
+            }
+
+            .info-value {
+                font-size: 15px;
+            }
+
+            /* QRプレビュー */
+            .qr-preview {
+                padding: 15px;
+            }
+
+            .qr-preview h3 {
+                font-size: 16px;
+            }
+
+            .qr-preview canvas {
+                max-width: 150px;
+            }
+
+            .qr-url {
+                font-size: 11px;
+            }
+
+            /* 出力オプション */
+            .output-options {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 15px;
+            }
+
+            .option-item {
+                font-size: 14px;
+            }
+
+            .option-item label {
+                font-size: 14px;
+            }
+
+            /* アクションボタン */
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+
+            /* 注意事項 */
+            .note {
+                padding: 12px;
+                font-size: 13px;
+                margin-top: 15px;
+            }
+
+            /* ローディング */
+            .loading {
+                padding: 30px 15px;
+            }
+
+            .loading i {
+                font-size: 40px;
+            }
+
+            .loading p {
+                font-size: 14px;
+            }
+        }
+
+        /* 極小画面 */
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .card-header {
+                font-size: 16px;
+            }
+
+            .qr-preview canvas {
+                max-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="back-btn" onclick="history.back()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1>📄 帳票出力</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="loading-state" class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>データを読み込んでいます...</p>
+        </div>
+
+        <div id="content-area" style="display: none;">
+            <div class="output-card">
+                <div class="card-header">
+                    <i class="fas fa-file-pdf"></i>
+                    帳票情報
+                </div>
+
+                <div class="info-section">
+                    <div class="info-row">
+                        <span class="info-label">車両番号</span>
+                        <span class="info-value" id="display-registration">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">顧客名</span>
+                        <span class="info-value" id="display-client">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">点検日</span>
+                        <span class="info-value" id="display-date">-</span>
+                    </div>
+                </div>
+
+                <div class="qr-preview">
+                    <h3 style="margin-bottom: 10px;">顧客専用ページ QRコード</h3>
+                    <canvas id="qr-canvas"></canvas>
+                    <div class="qr-url" id="qr-url">-</div>
+                </div>
+
+                <div class="output-options">
+                    <div class="option-item">
+                        <input type="checkbox" id="option-qr" checked>
+                        <label for="option-qr">QRコードを含める</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="option-photos" checked>
+                        <label for="option-photos">代表写真を含める</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="option-legend" checked>
+                        <label for="option-legend">凡例を含める</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="option-measurements" checked>
+                        <label for="option-measurements">測定値を含める</label>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="previewPDF()">
+                        <i class="fas fa-eye"></i>
+                        プレビュー
+                    </button>
+                    <button class="btn btn-primary" onclick="downloadPDF()">
+                        <i class="fas fa-download"></i>
+                        PDF出力
+                    </button>
+                </div>
+
+                <div class="note">
+                    <strong>📝 注意事項</strong><br>
+                    ・A3モノクロで出力されます（国土交通省様式準拠）<br>
+                    ・QRコードから顧客専用ページにアクセスできます<br>
+                    ・写真は代表画像（Before/After各1枚）のみ掲載されます<br>
+                    ・全ての写真は顧客専用ページで閲覧可能です
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api-helper.js"></script>
+    <script src="js/pdf-output.js"></script>
+</body>
+</html>

@@ -1,0 +1,1134 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+    background: #f5f5f5;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ヘッダー */
+.header {
+    background: #1a1a1a;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 14px;
+}
+
+.search-shortcut-btn {
+    background: rgba(33, 150, 243, 0.9);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-shortcut-btn:hover {
+    background: rgba(33, 150, 243, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+.vehicle-number {
+    background: rgba(255,255,255,0.1);
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.progress-badge {
+    background: #4CAF50;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+/* タブナビゲーション */
+.tab-navigation {
+    background: white;
+    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    padding: 0 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
+}
+
+.tab-navigation::-webkit-scrollbar {
+    height: 4px;
+}
+
+.tab-navigation::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tab-navigation::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 2px;
+}
+
+.tab-navigation::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
+}
+
+.tab-btn {
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: fit-content;
+}
+
+.tab-btn:hover {
+    background: #f5f5f5;
+}
+
+.tab-btn.active {
+    color: #ff6b35;
+    font-weight: bold;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #ff6b35;
+}
+
+.tab-badge {
+    display: inline-block;
+    background: #e0e0e0;
+    color: #666;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin-top: 2px;
+    min-width: 32px;
+    text-align: center;
+}
+
+.tab-btn.active .tab-badge {
+    background: #ff6b35;
+    color: white;
+}
+
+.tab-text {
+    display: block;
+    line-height: 1.2;
+}
+
+/* メインコンテンツ */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f0f0f0;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 車両情報入力画面 */
+.vehicle-info-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.vehicle-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.info-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.info-card-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #ff6b35;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-label {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.required {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+}
+
+.qr-scan-button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #ff6b35 0%, #f44336 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+}
+
+.qr-scan-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+}
+
+/* 点検項目グリッド */
+.inspection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 点検カード */
+.inspection-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background: #e8f5e9;
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #2e7d32;
+    border-bottom: 2px solid #c8e6c9;
+}
+
+.card-content {
+    padding: 15px;
+}
+
+.inspection-item {
+    padding: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    transition: background 0.2s;
+}
+
+.inspection-item:last-child {
+    border-bottom: none;
+}
+
+.inspection-item:hover {
+    background: #fafafa;
+}
+
+.inspection-item.checked {
+    background: #fff3e0;
+}
+
+.item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.item-name {
+    flex: 1;
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+}
+
+.item-name.required::before {
+    content: "★";
+    color: #ff6b35;
+    margin-right: 5px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.check-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.check-btn {
+    width: 42px;
+    height: 42px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    color: #999;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-btn:hover {
+    transform: scale(1.05);
+    border-color: #ff6b35;
+}
+
+.check-btn.selected {
+    background: #ff6b35;
+    border-color: #ff6b35;
+    color: white;
+    box-shadow: 0 2px 8px rgba(255,107,53,0.3);
+}
+
+.camera-btn {
+    width: 42px;
+    height: 42px;
+    border: 2px solid #2196F3;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #2196F3;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.camera-btn:hover {
+    background: #2196F3;
+    color: white;
+}
+
+.camera-btn.has-photos::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 16px;
+    height: 16px;
+    background: #4CAF50;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* セクションカード */
+.section-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* 交換部品 */
+.replacement-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.replacement-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.replacement-label {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.replacement-quantity {
+    width: 100px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-align: right;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.replacement-quantity:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+}
+
+/* メンテナンスアドバイス */
+.advice-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* 測定値 */
+.measurement-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.measurement-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.measurement-label {
+    font-size: 13px;
+    color: #666;
+}
+
+.measurement-input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* フローティングボタン */
+.floating-actions {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.fab {
+    padding: 15px 30px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fab:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.fab-primary {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+}
+
+.fab-secondary {
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: white;
+}
+
+/* 記号説明パネル */
+.legend-panel {
+    position: fixed;
+    top: 50%;
+    left: -300px;
+    transform: translateY(-50%);
+    width: 280px;
+    background: white;
+    border-radius: 0 10px 10px 0;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    padding: 20px;
+    transition: left 0.3s;
+    z-index: 999;
+}
+
+.legend-panel.show {
+    left: 0;
+}
+
+.legend-toggle {
+    position: absolute;
+    right: -40px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 80px;
+    background: white;
+    border-radius: 0 10px 10px 0;
+    border: none;
+    cursor: pointer;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    font-size: 20px;
+    color: #666;
+}
+
+.legend-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.legend-items {
+    display: grid;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-symbol {
+    width: 35px;
+    height: 35px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.legend-text {
+    font-size: 14px;
+    color: #666;
+}
+
+/* トースト通知 */
+.toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: #333;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transform: translateX(400px);
+    transition: transform 0.3s;
+    z-index: 2000;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+/* モーダル */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* 写真アップロード */
+.photo-upload-area {
+    margin-bottom: 20px;
+}
+
+.photo-upload-btn {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.photo-upload-btn:hover {
+    opacity: 0.9;
+}
+
+/* 写真ギャラリー */
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.photo-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-badge {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.photo-badge.before {
+    background: #f44336;
+}
+
+.photo-badge.after {
+    background: #4CAF50;
+}
+
+.photo-delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: #f44336;
+    font-size: 16px;
+}
+
+.photo-controls {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.photo-control-btn {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    /* ヘッダー */
+    .header {
+        padding: 12px 15px;
+    }
+
+    .header-left {
+        gap: 10px;
+    }
+
+    .header-title {
+        font-size: 18px;
+    }
+
+    .header-info {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .search-shortcut-btn span {
+        display: none;
+    }
+
+    .search-shortcut-btn {
+        padding: 8px 12px;
+        min-width: 40px;
+        justify-content: center;
+    }
+
+    .vehicle-number {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .progress-badge {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    /* タブナビゲーション */
+    .tab-navigation {
+        padding: 0 5px;
+    }
+
+    .tab-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+        gap: 3px;
+    }
+
+    .tab-text {
+        font-size: 13px;
+    }
+
+    .tab-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        min-width: 28px;
+    }
+
+    /* メインコンテンツ */
+    .main-content {
+        padding: 15px 10px;
+    }
+
+    /* グリッド */
+    .inspection-grid,
+    .vehicle-info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    /* 点検カード */
+    .card-header {
+        font-size: 15px;
+        padding: 10px 15px;
+    }
+
+    .card-content {
+        padding: 10px;
+    }
+
+    .inspection-item {
+        padding: 10px;
+    }
+
+    .item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .item-name {
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .item-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .check-buttons {
+        flex: 1;
+    }
+
+    .check-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+
+    .camera-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+
+    /* 車両情報カード */
+    .info-card {
+        padding: 20px 15px;
+    }
+
+    .info-card-header {
+        font-size: 16px;
+    }
+
+    .input-group {
+        margin-bottom: 12px;
+    }
+
+    .input-label {
+        font-size: 13px;
+    }
+
+    .input-field {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .qr-scan-button {
+        padding: 12px;
+        font-size: 15px;
+        margin-bottom: 15px;
+    }
+
+    /* セクションカード */
+    .section-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .section-header {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    /* 測定値・交換部品 */
+    .measurement-grid,
+    .replacement-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .replacement-item {
+        padding: 10px;
+    }
+
+    .replacement-label {
+        font-size: 13px;
+    }
+
+    .replacement-quantity {
+        width: 90px;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .measurement-item {
+        gap: 3px;
+    }
+
+    .measurement-label {
+        font-size: 12px;
+    }
+
+    .measurement-input {
+        padding: 8px;
+        font-size: 13px;
+    }
+
+    /* アドバイステキストエリア */
+    .advice-textarea {
+        min-height: 100px;
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    /* フローティングボタン */
+    .floating-actions {
+        flex-direction: column;
+        bottom: 15px;
+        right: 15px;
+        gap: 10px;
+    }
+
+    .fab {
+        padding: 12px 20px;
+        font-size: 14px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    /* 記号説明パネル */
+    .legend-panel {
+        width: 240px;
+    }
+
+    .legend-toggle {
+        width: 35px;
+        height: 70px;
+        font-size: 18px;
+    }
+
+    .legend-title {
+        font-size: 14px;
+    }
+
+    .legend-symbol {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .legend-text {
+        font-size: 13px;
+    }
+
+    /* 写真モーダル */
+    .modal-content {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    .modal-header {
+        padding: 15px;
+    }
+
+    .modal-header h3 {
+        font-size: 18px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .photo-upload-btn {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .photo-gallery {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .photo-badge {
+        font-size: 10px;
+        padding: 3px 6px;
+    }
+
+    .photo-delete {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .photo-control-btn {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+/* 極小画面対応 (360px以下) */
+@media (max-width: 360px) {
+    .header-title {
+        font-size: 16px;
+    }
+
+    .tab-navigation {
+        padding: 0 3px;
+    }
+
+    .tab-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+        gap: 2px;
+    }
+
+    .tab-text {
+        font-size: 12px;
+    }
+
+    .tab-badge {
+        font-size: 9px;
+        padding: 1px 5px;
+        min-width: 24px;
+    }
+
+    .check-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 15px;
+    }
+
+    .camera-btn {
+        width: 35px;
+        height: 35px;
+    }
+
+    .fab {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .photo-gallery {
+        grid-template-columns: 1fr;
+    }
+}

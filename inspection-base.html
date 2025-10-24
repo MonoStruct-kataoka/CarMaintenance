@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整備記録簿システム - タブレット版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ヘッダー */
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .vehicle-number {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .progress-badge {
+            background: #4CAF50;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* タブナビゲーション */
+        .tab-navigation {
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            padding: 0 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .tab-btn.active {
+            color: #ff6b35;
+            font-weight: bold;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #ff6b35;
+        }
+
+        .tab-badge {
+            display: inline-block;
+            background: #e0e0e0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .tab-btn.active .tab-badge {
+            background: #ff6b35;
+            color: white;
+        }
+
+        /* メインコンテンツ */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        /* 車両情報入力画面 */
+        .vehicle-info-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .vehicle-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-card-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff6b35;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+        }
+
+        .qr-scan-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f44336 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255,107,53,0.3);
+        }
+
+        .qr-scan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+        }
+
+        /* 点検項目グリッド */
+        .inspection-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 点検カード */
+        .inspection-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #e8f5e9;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #2e7d32;
+            border-bottom: 2px solid #c8e6c9;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .inspection-item {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s;
+        }
+
+        .inspection-item:last-child {
+            border-bottom: none;
+        }
+
+        .inspection-item:hover {
+            background: #fafafa;
+        }
+
+        .inspection-item.checked {
+            background: #fff3e0;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item-name {
+            flex: 1;
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .item-name.required::before {
+            content: "★";
+            color: #ff6b35;
+            margin-right: 5px;
+        }
+
+        .check-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            max-width: 300px;
+        }
+
+        .check-btn {
+            width: 42px;
+            height: 42px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            color: #999;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .check-btn:hover {
+            transform: scale(1.05);
+            border-color: #ff6b35;
+        }
+
+        .check-btn.selected {
+            background: #ff6b35;
+            border-color: #ff6b35;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255,107,53,0.3);
+        }
+
+        /* 交換部品セクション */
+        .replacement-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .replacement-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .replacement-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .replacement-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+        }
+
+        .replacement-label {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .replacement-quantity {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* メンテナンスアドバイス */
+        .advice-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .advice-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            margin-top: 10px;
+        }
+
+        /* 測定値セクション */
+        .measurement-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .measurement-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .measurement-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .measurement-label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .measurement-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        /* 整備情報セクション */
+        .maintenance-info-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0 100px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .maintenance-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        /* フローティングボタン */
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .fab {
+            padding: 15px 30px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .fab:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .fab-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .fab-secondary {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+
+        /* 記号説明パネル */
+        .legend-panel {
+            position: fixed;
+            top: 50%;
+            left: -300px;
+            transform: translateY(-50%);
+            width: 280px;
+            background: white;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            padding: 20px;
+            transition: left 0.3s;
+            z-index: 999;
+        }
+
+        .legend-panel.show {
+            left: 0;
+        }
+
+        .legend-toggle {
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 80px;
+            background: white;
+            border-radius: 0 10px 10px 0;
+            border: none;
+            cursor: pointer;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .legend-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .legend-items {
+            display: grid;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-symbol {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* トースト通知 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 768px) {
+            .inspection-grid,
+            .vehicle-info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <div class="header">
+            <div class="header-title">
+                <span>🔧</span>
+                <span id="section-title">整備記録簿システム</span>
+            </div>
+            <div class="header-info">
+                <div class="vehicle-number" id="vehicle-display">未登録</div>
+                <div class="progress-badge">
+                    <span id="progress-text">0 / 0 完了</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- タブナビゲーション -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('vehicle')">
+                車両情報
+            </button>
+            <button class="tab-btn" onclick="switchTab('engine')">
+                エンジンルーム
+                <span class="tab-badge">0/0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('interior')">
+                室内点検
+                <span class="tab-badge">0/0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('undercarriage')">
+                足廻り点検
+                <span class="tab-badge">0/0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('bottom')">
+                下廻り点検
+                <span class="tab-badge">0/0</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('additional')">
+                追加項目
+            </button>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="main-content" id="main-content">
+            <!-- 車両情報入力 -->
+            <div class="tab-content" id="vehicle-content">
+                <div class="vehicle-info-container">
+                    <div class="vehicle-info-grid">
+                        <div class="info-card">
+                            <div class="info-card-header">📋 基本情報</div>
+                            <button class="qr-scan-button" onclick="scanQRCode()">
+                                <span>📷</span>
+                                <span>車検証QRコードをスキャン</span>
+                            </button>
+                            <div class="input-group">
+                                <label class="input-label">依頼者の氏名又は名称</label>
+                                <input type="text" class="input-field" id="client-name" placeholder="例：有限会社アルプス">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">自動車登録番号又は車両番号</label>
+                                <input type="text" class="input-field" id="registration-number" placeholder="例：四谷 330 せ 6098">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">車名及び型式</label>
+                                <input type="text" class="input-field" id="car-model" placeholder="例：GAA-SNT33">
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-header">🚗 詳細情報</div>
+                            <div class="input-group">
+                                <label class="input-label">車台番号</label>
+                                <input type="text" class="input-field" id="chassis-number" placeholder="例：SNT33-028686">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">原動機の型式</label>
+                                <input type="text" class="input-field" id="engine-model" placeholder="例：MA03">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">初度登録年月又は初度検査年月</label>
+                                <input type="text" class="input-field" id="first-registration" placeholder="例：令和6年3月">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">走行距離（km）</label>
+                                <input type="number" class="input-field" id="mileage" placeholder="例：76296">
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-header">🏢 整備情報</div>
+                            <div class="input-group">
+                                <label class="input-label">事業場の名称・所在地</label>
+                                <input type="text" class="input-field" id="workshop-name" value="株式会社日産サティオ埼玉北 寄居サービス工場" readonly style="background: #f3f4f6;">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">点検の年月日</label>
+                                <input type="date" class="input-field" id="inspection-date">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">整備完了年月日</label>
+                                <input type="date" class="input-field" id="completion-date">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">整備責任者の氏名</label>
+                                <input type="text" class="input-field" id="mechanic-name" value="田中 太郎" readonly style="background: #f3f4f6;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- エンジンルーム点検 -->
+            <div class="tab-content" id="engine-content" style="display: none;">
+                <div class="inspection-grid">
+                    <div class="inspection-card">
+                        <div class="card-header">■ パワー・ステアリング</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">ベルトの緩み、損傷</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ 冷却装置</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">ファンベルトの緩み、損傷</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">冷却水の漏れ</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'L')">L</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ 点火装置</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name required">スパーク・プラグの状態</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'C')">C</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ バッテリ</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">ターミナル部の緩み、腐食</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'C')">C</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'T')">T</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ エア・クリーナ</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">エレメントの状態</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'C')">C</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 室内点検 -->
+            <div class="tab-content" id="interior-content" style="display: none;">
+                <div class="inspection-grid">
+                    <div class="inspection-card">
+                        <div class="card-header">■ ブレーキ・ペダル</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">遊び、踏み込んだときの床板とのすき間</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name required">ブレーキの効き具合</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ パーキング・ブレーキ</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">引きしろ（踏みしろ）</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ クラッチ・ペダル</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">遊び、切れたときの床板とのすき間</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 足廻り点検 -->
+            <div class="tab-content" id="undercarriage-content" style="display: none;">
+                <div class="inspection-grid">
+                    <div class="inspection-card">
+                        <div class="card-header">■ ブレーキ・ディスク、ドラム</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name required">ブレーキ・パッドの摩耗</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'C')">C</button>
+                                        <button class="check-btn" onclick="checkItem(this, '○')">○</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ タイヤ</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name required">タイヤの空気圧</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'A')">A</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'L')">L</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name required">タイヤの溝の深さ、異常な摩耗</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ ホイール</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">ナット、ボルトの緩み</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'T')">T</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'P')">P</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下廻り点検 -->
+            <div class="tab-content" id="bottom-content" style="display: none;">
+                <div class="inspection-grid">
+                    <div class="inspection-card">
+                        <div class="card-header">■ エンジンオイル</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name required">オイルの漏れ</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'L')">L</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="inspection-card">
+                        <div class="card-header">■ トランスミッション</div>
+                        <div class="card-content">
+                            <div class="inspection-item">
+                                <div class="item-row">
+                                    <div class="item-name">オイルの漏れ、量</div>
+                                    <div class="check-buttons">
+                                        <button class="check-btn" onclick="checkItem(this, '✓')">✓</button>
+                                        <button class="check-btn" onclick="checkItem(this, '×')">×</button>
+                                        <button class="check-btn" onclick="checkItem(this, 'L')">L</button>
+                                        <button class="check-btn" onclick="checkItem(this, '△')">△</button>
+                                        <button class="check-btn" onclick="checkItem(this, '/')">/</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 追加項目 -->
+            <div class="tab-content" id="additional-content" style="display: none;">
+                <!-- 主な交換部品 -->
+                <div class="replacement-section">
+                    <h3 style="font-size: 18px; margin-bottom: 10px;">🔄 主な交換部品等</h3>
+                    <div class="replacement-grid">
+                        <div class="replacement-item">
+                            <input type="checkbox" class="replacement-checkbox" id="engine-oil">
+                            <label for="engine-oil" class="replacement-label">エンジン・オイル</label>
+                            <input type="number" class="replacement-quantity" placeholder="数量" min="1">
+                        </div>
+                        <div class="replacement-item">
+                            <input type="checkbox" class="replacement-checkbox" id="oil-filter">
+                            <label for="oil-filter" class="replacement-label">オイル・フィルタ</label>
+                            <input type="number" class="replacement-quantity" placeholder="数量" min="1">
+                        </div>
+                        <div class="replacement-item">
+                            <input type="checkbox" class="replacement-checkbox" id="llc">
+                            <label for="llc" class="replacement-label">LLC (ロング・ライフ・クーラント)</label>
+                            <input type="number" class="replacement-quantity" placeholder="L" min="1">
+                        </div>
+                        <div class="replacement-item">
+                            <input type="checkbox" class="replacement-checkbox" id="brake-fluid">
+                            <label for="brake-fluid" class="replacement-label">ブレーキ・フルード</label>
+                            <input type="number" class="replacement-quantity" placeholder="L" min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- メンテナンスアドバイス -->
+                <div class="advice-section">
+                    <h3 style="font-size: 18px;">💡 メンテナンスに関するアドバイス</h3>
+                    <textarea class="advice-textarea" placeholder="次回の点検時期や交換推奨部品など、お客様へのアドバイスを記入してください。"></textarea>
+                </div>
+
+                <!-- 測定値 -->
+                <div class="measurement-section">
+                    <h3 style="font-size: 18px;">📏 測定値</h3>
+                    <div class="measurement-grid">
+                        <div class="measurement-item">
+                            <label class="measurement-label">CO濃度（アイドリング時）</label>
+                            <input type="text" class="measurement-input" placeholder="0.0 %">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">HC濃度</label>
+                            <input type="text" class="measurement-input" placeholder="0 ppm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">タイヤ溝の深さ（前輪左）</label>
+                            <input type="text" class="measurement-input" placeholder="10.0 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">タイヤ溝の深さ（前輪右）</label>
+                            <input type="text" class="measurement-input" placeholder="10.0 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">タイヤ溝の深さ（後輪左）</label>
+                            <input type="text" class="measurement-input" placeholder="10.0 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">タイヤ溝の深さ（後輪右）</label>
+                            <input type="text" class="measurement-input" placeholder="10.0 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">ブレーキ・パッド厚さ（前輪左）</label>
+                            <input type="text" class="measurement-input" placeholder="4.4 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">ブレーキ・パッド厚さ（前輪右）</label>
+                            <input type="text" class="measurement-input" placeholder="4.4 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">ブレーキ・パッド厚さ（後輪左）</label>
+                            <input type="text" class="measurement-input" placeholder="8.4 mm">
+                        </div>
+                        <div class="measurement-item">
+                            <label class="measurement-label">ブレーキ・パッド厚さ（後輪右）</label>
+                            <input type="text" class="measurement-input" placeholder="8.7 mm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- フローティングボタン -->
+        <div class="floating-actions">
+            <button class="fab fab-secondary" onclick="takePhoto()">📷 写真撮影</button>
+            <button class="fab fab-primary" onclick="saveData()">💾 保存</button>
+        </div>
+
+        <!-- 記号説明パネル -->
+        <div class="legend-panel" id="legendPanel">
+            <button class="legend-toggle" onclick="toggleLegend()">📖</button>
+            <div class="legend-title">点検記号の説明</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #4CAF50;">✓</div>
+                    <div class="legend-text">点検良好</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #f44336;">×</div>
+                    <div class="legend-text">交換</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #ff9800;">A</div>
+                    <div class="legend-text">調整</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #2196F3;">C</div>
+                    <div class="legend-text">清掃</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #9c27b0;">P</div>
+                    <div class="legend-text">省略</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #795548;">○</div>
+                    <div class="legend-text">特定整備</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #607d8b;">△</div>
+                    <div class="legend-text">修理</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #009688;">T</div>
+                    <div class="legend-text">締付</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #00BCD4;">L</div>
+                    <div class="legend-text">給油(水)</div>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-symbol" style="color: #9e9e9e;">／</div>
+                    <div class="legend-text">該当なし</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- トースト通知 -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+        // グローバル変数
+        let currentTab = 'vehicle';
+        const inspectionData = {};
+        const vehicleData = {};
+        const replacementParts = {};
+
+        // 初期化
+        window.addEventListener('DOMContentLoaded', () => {
+            // 本日の日付を設定
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('inspection-date').value = today;
+            document.getElementById('completion-date').value = today;
+            
+            updateProgress();
+        });
+
+        // タブ切り替え
+        function switchTab(tabName) {
+            // 全タブコンテンツを非表示
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // タブボタンのアクティブ状態を更新
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // クリックされたタブをアクティブに
+            event.target.classList.add('active');
+            
+            // 対応するコンテンツを表示
+            document.getElementById(tabName + '-content').style.display = 'block';
+            
+            // ヘッダータイトルを更新
+            const titles = {
+                vehicle: '車両情報登録',
+                engine: 'エンジン・ルーム点検',
+                interior: '室内点検',
+                undercarriage: '足廻り点検',
+                bottom: '下廻り点検',
+                additional: '追加項目'
+            };
+            document.getElementById('section-title').textContent = titles[tabName];
+            
+            currentTab = tabName;
+        }
+
+        // QRコードスキャン
+        function scanQRCode() {
+            showToast('📷 カメラを起動中...');
+            
+            setTimeout(() => {
+                // デモ用：サンプルデータを自動入力
+                document.getElementById('registration-number').value = '四谷 330 せ 6098';
+                document.getElementById('car-model').value = 'GAA-SNT33';
+                document.getElementById('chassis-number').value = 'SNT33-028686';
+                document.getElementById('engine-model').value = 'MA03';
+                document.getElementById('first-registration').value = '令和6年3月';
+                
+                // ヘッダーの車両番号を更新
+                document.getElementById('vehicle-display').textContent = '四谷 330 せ 6098';
+                
+                showToast('✅ 車検証情報を読み取りました');
+            }, 1500);
+        }
+
+        // 項目をチェック
+        function checkItem(button, symbol) {
+            const parent = button.closest('.inspection-item');
+            const itemName = parent.querySelector('.item-name').textContent;
+            
+            // 同じ行の他のボタンをリセット
+            parent.querySelectorAll('.check-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // クリックされたボタンを選択状態に
+            button.classList.add('selected');
+            
+            // 親要素にチェック済みマーク
+            parent.classList.add('checked');
+            
+            // データを保存
+            inspectionData[itemName] = {
+                symbol: symbol,
+                tab: currentTab
+            };
+            
+            // 進捗を更新
+            updateProgress();
+            
+            // 振動フィードバック
+            if ('vibrate' in navigator) {
+                navigator.vibrate(10);
+            }
+        }
+
+        // 進捗を更新
+        function updateProgress() {
+            // タブごとの項目数と完了数を計算
+            const tabItemCounts = {
+                engine: 5,
+                interior: 3,
+                undercarriage: 3,
+                bottom: 2
+            };
+            
+            const tabProgress = {
+                engine: 0,
+                interior: 0,
+                undercarriage: 0,
+                bottom: 0
+            };
+            
+            // 完了項目をカウント
+            Object.values(inspectionData).forEach(item => {
+                if (item.tab && tabProgress.hasOwnProperty(item.tab)) {
+                    tabProgress[item.tab]++;
+                }
+            });
+            
+            // 全体の進捗
+            const totalItems = Object.values(tabItemCounts).reduce((a, b) => a + b, 0);
+            const checkedItems = Object.keys(inspectionData).length;
+            document.getElementById('progress-text').textContent = `${checkedItems} / ${totalItems} 完了`;
+            
+            // タブバッジを更新
+            const tabNames = ['engine', 'interior', 'undercarriage', 'bottom'];
+            const badges = document.querySelectorAll('.tab-badge');
+            badges.forEach((badge, index) => {
+                const tabName = tabNames[index];
+                if (tabItemCounts[tabName]) {
+                    badge.textContent = `${tabProgress[tabName]}/${tabItemCounts[tabName]}`;
+                }
+            });
+        }
+
+        // 記号説明パネルの開閉
+        function toggleLegend() {
+            const panel = document.getElementById('legendPanel');
+            panel.classList.toggle('show');
+        }
+
+        // 写真撮影
+        function takePhoto() {
+            showToast('📷 カメラ機能は実装予定です');
+        }
+
+        // データ保存
+        function saveData() {
+            // 車両情報を収集
+            vehicleData.clientName = document.getElementById('client-name').value;
+            vehicleData.registrationNumber = document.getElementById('registration-number').value;
+            vehicleData.carModel = document.getElementById('car-model').value;
+            vehicleData.chassisNumber = document.getElementById('chassis-number').value;
+            vehicleData.engineModel = document.getElementById('engine-model').value;
+            vehicleData.firstRegistration = document.getElementById('first-registration').value;
+            vehicleData.mileage = document.getElementById('mileage').value;
+            
+            // 整備情報を収集
+            const maintenanceInfo = {
+                workshopName: document.getElementById('workshop-name').value,
+                inspectionDate: document.getElementById('inspection-date').value,
+                completionDate: document.getElementById('completion-date').value,
+                mechanicName: document.getElementById('mechanic-name').value
+            };
+            
+            // 交換部品を収集
+            document.querySelectorAll('.replacement-checkbox:checked').forEach(checkbox => {
+                const label = checkbox.nextElementSibling.textContent;
+                const quantity = checkbox.parentElement.querySelector('.replacement-quantity').value || '1';
+                replacementParts[label] = quantity;
+            });
+            
+            // メンテナンスアドバイスを収集
+            const advice = document.querySelector('.advice-textarea')?.value || '';
+            
+            // 測定値を収集
+            const measurements = {};
+            document.querySelectorAll('.measurement-item').forEach(item => {
+                const label = item.querySelector('.measurement-label').textContent;
+                const value = item.querySelector('.measurement-input').value;
+                if (value) measurements[label] = value;
+            });
+            
+            // 全データをまとめる
+            const allData = {
+                timestamp: new Date().toISOString(),
+                vehicleData,
+                maintenanceInfo,
+                inspectionData,
+                replacementParts,
+                advice,
+                measurements
+            };
+            
+            console.log('保存データ:', allData);
+            showToast('✅ 整備記録を保存しました');
+            
+            // 振動フィードバック
+            if ('vibrate' in navigator) {
+                navigator.vibrate([50, 50, 50]);
+            }
+        }
+
+        // トースト通知
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 車両番号入力時の自動更新
+        document.getElementById('registration-number')?.addEventListener('input', function() {
+            const value = this.value || '未登録';
+            document.getElementById('vehicle-display').textContent = value;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特定整備記録簿システム - トップページ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .menu-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .menu-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .menu-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .info-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+        }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .info-list {
+            list-style: none;
+            line-height: 2;
+        }
+
+        .info-list li::before {
+            content: "✓ ";
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 特定整備記録簿システム</h1>
+            <p>国土交通省様式準拠・デジタル整備記録管理システム</p>
+        </div>
+
+        <div class="menu-grid">
+            <a href="inspection.html" class="menu-card">
+                <div class="menu-icon">📝</div>
+                <div class="menu-title">新規点検入力</div>
+                <div class="menu-description">
+                    車両情報の登録と点検項目の入力を行います。<br>
+                    写真撮影・部品交換記録も同時に管理できます。
+                </div>
+            </a>
+
+            <a href="search.html" class="menu-card">
+                <div class="menu-icon">🔍</div>
+                <div class="menu-title">整備記録検索</div>
+                <div class="menu-description">
+                    過去の整備記録を検索・閲覧します。<br>
+                    顧客名・車両番号・電話番号で検索可能です。
+                </div>
+            </a>
+        </div>
+
+        <div class="info-section">
+            <div class="info-title">システムの特長</div>
+            <ul class="info-list">
+                <li>スマホ・タブレット・PCで利用可能（レスポンシブ対応）</li>
+                <li>国土交通省様式「特定整備記録簿」完全準拠</li>
+                <li>写真撮影機能付き（Before/After管理）</li>
+                <li>QRコード付きA3モノクロPDF出力</li>
+                <li>顧客専用閲覧ページ自動生成</li>
+                <li>点検履歴の一元管理・検索</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

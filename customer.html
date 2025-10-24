@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整備記録 - お客様専用ページ</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, 'Hiragino Kaku Gothic ProN', 'メイリオ', sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #999;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .inspection-results {
+            margin-top: 20px;
+        }
+
+        .inspection-category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .inspection-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .inspection-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            color: #666;
+        }
+
+        .item-result {
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        .result-ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .result-replace {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .result-adjust {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .photo-badge.before {
+            background: #f44336;
+        }
+
+        .photo-badge.after {
+            background: #4CAF50;
+        }
+
+        .replacement-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .replacement-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .replacement-icon {
+            font-size: 24px;
+            color: #667eea;
+        }
+
+        .replacement-info {
+            flex: 1;
+        }
+
+        .replacement-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .replacement-quantity {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .advice-box {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .advice-box p {
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .measurements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .measurement-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .measurement-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .measurement-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.show {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .error-state i {
+            font-size: 64px;
+            color: #f44336;
+            margin-bottom: 20px;
+        }
+
+        .error-state h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .error-state p {
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            /* ヘッダー */
+            .header {
+                padding: 25px 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header p {
+                font-size: 13px;
+            }
+
+            /* メインコンテンツ */
+            .main-content {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+
+            /* カード */
+            .info-card {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+
+            .card-header {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+
+            /* グリッド */
+            .info-grid,
+            .replacement-list,
+            .measurements-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .info-item {
+                gap: 3px;
+            }
+
+            .info-label {
+                font-size: 12px;
+            }
+
+            .info-value {
+                font-size: 15px;
+            }
+
+            /* 点検結果 */
+            .category-title {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .inspection-item {
+                padding: 10px 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .item-name {
+                font-size: 14px;
+            }
+
+            .item-result {
+                align-self: flex-end;
+                font-size: 13px;
+            }
+
+            /* 交換部品 */
+            .replacement-item {
+                padding: 12px;
+            }
+
+            .replacement-icon {
+                font-size: 20px;
+            }
+
+            .replacement-name {
+                font-size: 14px;
+            }
+
+            .replacement-quantity {
+                font-size: 13px;
+            }
+
+            /* アドバイスボックス */
+            .advice-box {
+                padding: 15px;
+            }
+
+            .advice-box p {
+                font-size: 14px;
+                line-height: 1.7;
+            }
+
+            /* 測定値 */
+            .measurement-item {
+                padding: 12px;
+            }
+
+            .measurement-label {
+                font-size: 12px;
+            }
+
+            .measurement-value {
+                font-size: 18px;
+            }
+
+            /* 写真ギャラリー */
+            .photo-gallery {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .photo-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            /* ライトボックス */
+            .lightbox img {
+                max-width: 95%;
+                max-height: 80%;
+            }
+
+            .lightbox-close {
+                top: 10px;
+                right: 10px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+            }
+
+            /* エラー状態 */
+            .error-state {
+                padding: 40px 15px;
+            }
+
+            .error-state i {
+                font-size: 48px;
+            }
+
+            .error-state h2 {
+                font-size: 20px;
+            }
+
+            .error-state p {
+                font-size: 14px;
+            }
+        }
+
+        /* 極小画面 */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .card-header {
+                font-size: 16px;
+            }
+
+            .photo-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 整備記録</h1>
+        <p>お客様専用ページ</p>
+    </div>
+
+    <div class="main-content" id="main-content">
+        <!-- 読み込み中 -->
+        <div class="info-card" id="loading-state">
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <p>読み込み中...</p>
+            </div>
+        </div>
+
+        <!-- エラー状態 -->
+        <div class="error-state" id="error-state" style="display: none;">
+            <i class="fas fa-exclamation-circle"></i>
+            <h2>アクセスできません</h2>
+            <p>このページは有効期限が切れているか、URLが正しくありません。<br>整備工場にお問い合わせください。</p>
+        </div>
+
+        <!-- コンテンツ（JavaScriptで動的生成） -->
+        <div id="content-area" style="display: none;"></div>
+    </div>
+
+    <!-- ライトボックス -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="lightbox-image" src="" alt="拡大画像">
+    </div>
+
+    <script src="js/api-helper.js"></script>
+    <script src="js/customer.js"></script>
+</body>
+</html>
