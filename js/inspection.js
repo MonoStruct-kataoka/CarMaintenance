@@ -124,7 +124,10 @@ function renderReplacementParts() {
     const html = replacementParts.map(part => `
         <div class="replacement-item">
             <label for="${part.id}" class="replacement-label">${part.name}</label>
-            <input type="number" class="replacement-quantity" id="${part.id}" placeholder="${part.unit}" min="0" step="0.1" data-part-id="${part.id}">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="number" class="replacement-quantity" id="${part.id}" placeholder="${part.unit}" min="0" step="0.1" data-part-id="${part.id}" data-part-name="${part.name}" data-part-unit="${part.unit}">
+                ${part.custom ? `<button class="delete-part-btn" onclick="deleteCustomPart('${part.id}')" title="削除"><i class="fas fa-trash"></i></button>` : ''}
+            </div>
         </div>
     `).join('');
 
@@ -180,16 +183,22 @@ function checkItem(itemId, code) {
 
 // 進捗を更新
 function updateProgress() {
+    // 実際の項目数を動的に計算
     const sections = {
-        engine: { total: 5, checked: 0 },
-        interior: { total: 3, checked: 0 },
-        undercarriage: { total: 3, checked: 0 },
-        bottom: { total: 2, checked: 0 }
+        engine: { total: inspectionItems.engine.reduce((sum, g) => sum + g.items.length, 0), checked: 0 },
+        interior: { total: inspectionItems.interior.reduce((sum, g) => sum + g.items.length, 0), checked: 0 },
+        undercarriage: { total: inspectionItems.undercarriage.reduce((sum, g) => sum + g.items.length, 0), checked: 0 },
+        bottom: { total: inspectionItems.bottom.reduce((sum, g) => sum + g.items.length, 0), checked: 0 }
     };
 
     // チェック済み項目をカウント
     Object.keys(inspectionData).forEach(itemId => {
-        const section = itemId.split('_')[0];
+        // IDプレフィックスからセクションを判定
+        let section = itemId.split('_')[0];
+        // "under" を "undercarriage" にマッピング
+        if (section === 'under') {
+            section = 'undercarriage';
+        }
         if (sections[section]) {
             sections[section].checked++;
         }
@@ -280,8 +289,7 @@ function addPhoto(itemId, dataUrl) {
         id: photoId,
         url: dataUrl,
         beforeAfter: 'before',
-        timestamp: new Date().toISOString(),
-        isCover: photosData[itemId].length === 0
+        timestamp: new Date().toISOString()
     });
 
     // カメラボタンにバッジを追加
@@ -316,7 +324,6 @@ function renderPhotoGallery() {
                 <button class="photo-control-btn" onclick="toggleBeforeAfter('${currentPhotoItemId}', '${photo.id}')">
                     ${photo.beforeAfter === 'before' ? '後に変更' : '前に変更'}
                 </button>
-                ${!photo.isCover ? `<button class="photo-control-btn" onclick="setCover('${currentPhotoItemId}', '${photo.id}')">代表</button>` : ''}
             </div>
         </div>
     `).join('');
@@ -329,11 +336,6 @@ function deletePhoto(itemId, photoId) {
     if (!photosData[itemId]) return;
 
     photosData[itemId] = photosData[itemId].filter(p => p.id !== photoId);
-
-    // 代表写真がなくなった場合は最初の写真を代表にする
-    if (photosData[itemId].length > 0 && !photosData[itemId].some(p => p.isCover)) {
-        photosData[itemId][0].isCover = true;
-    }
 
     updateCameraButton(itemId);
     renderPhotoGallery();
@@ -349,17 +351,7 @@ function toggleBeforeAfter(itemId, photoId) {
     renderPhotoGallery();
 }
 
-// 代表写真に設定
-function setCover(itemId, photoId) {
-    if (!photosData[itemId]) return;
 
-    photosData[itemId].forEach(p => {
-        p.isCover = (p.id === photoId);
-    });
-
-    renderPhotoGallery();
-    showToast('✅ 代表写真に設定しました');
-}
 
 // カメラボタンを更新
 function updateCameraButton(itemId) {
@@ -429,7 +421,8 @@ async function completeInspection() {
             currentRecordId = record.id;
         }
 
-        // 写真を保存
+        // 既存の写真を削除してから新しい写真を保存
+        await deleteExistingPhotos(currentRecordId);
         await savePhotos();
 
         showToast('✅ 整備記録を完了しました');
@@ -476,12 +469,16 @@ function collectFormData() {
         const partId = input.getAttribute('data-part-id');
         const quantity = input.value;
         if (quantity && parseFloat(quantity) > 0) {
-            const partName = replacementParts.find(p => p.id === partId)?.name || '';
-            const unit = replacementParts.find(p => p.id === partId)?.unit || '';
+            const partName = input.getAttribute('data-part-name') || '';
+            const unit = input.getAttribute('data-part-unit') || '';
             parts[partName] = `${quantity} ${unit}`;
         }
     });
     vehicleData.replacement_parts = JSON.stringify(parts);
+    
+    // カスタム部品リストを保存
+    const customParts = replacementParts.filter(p => p.custom);
+    vehicleData.custom_parts = JSON.stringify(customParts);
 
     // アドバイス
     vehicleData.advice = document.getElementById('advice')?.value || '';
@@ -496,9 +493,10 @@ function collectFormData() {
     });
     vehicleData.measurements = JSON.stringify(measurementData);
 
-    // タグ
+    // タグ（JSON文字列として保存）
     const tagsInput = document.getElementById('tags')?.value || '';
-    vehicleData.tags = tagsInput.split(',').map(t => t.trim()).filter(t => t);
+    const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(t => t);
+    vehicleData.tags = JSON.stringify(tagsArray);
 
     return vehicleData;
 }
@@ -530,11 +528,38 @@ async function loadRecord(id) {
         document.getElementById('inspection-date').value = record.inspection_date || '';
         document.getElementById('completion-date').value = record.completion_date || '';
         document.getElementById('mechanic-name').value = record.mechanic_name || '';
-        document.getElementById('tags').value = (record.tags || []).join(', ');
+        // タグを復元（JSON文字列または配列に対応）
+        let tagsArray = [];
+        if (record.tags) {
+            try {
+                tagsArray = typeof record.tags === 'string' ? JSON.parse(record.tags) : record.tags;
+            } catch (e) {
+                tagsArray = [];
+            }
+        }
+        document.getElementById('tags').value = tagsArray.join(', ');
         document.getElementById('advice').value = record.advice || '';
 
         // 車両番号を表示
         document.getElementById('vehicle-display').textContent = record.registration_number || '未登録';
+
+        // カスタム部品を復元（点検データより先に）
+        if (record.custom_parts) {
+            try {
+                const customParts = JSON.parse(record.custom_parts);
+                customParts.forEach(part => {
+                    // 既存の部品リストに存在しない場合のみ追加
+                    const exists = replacementParts.some(p => p.id === part.id);
+                    if (!exists) {
+                        replacementParts.push(part);
+                    }
+                });
+                // 部品リストを再描画
+                renderReplacementParts();
+            } catch (e) {
+                console.error('カスタム部品の復元エラー:', e);
+            }
+        }
 
         // 点検データを復元
         if (record.inspection_data) {
@@ -572,7 +597,10 @@ async function loadRecord(id) {
                     // "数量 単位" 形式から数量のみを抽出
                     const quantityStr = parts[partName].toString();
                     const quantity = quantityStr.split(' ')[0];
-                    document.querySelector(`.replacement-quantity[data-part-id="${part.id}"]`).value = quantity;
+                    const input = document.querySelector(`.replacement-quantity[data-part-id="${part.id}"]`);
+                    if (input) {
+                        input.value = quantity;
+                    }
                 }
             });
         }
@@ -594,15 +622,19 @@ async function savePhotos() {
 
     for (const itemId of Object.keys(photosData)) {
         const photos = photosData[itemId];
+        
+        // itemIdから項目名を取得
+        const itemName = getItemNameById(itemId);
+        
         for (const photo of photos) {
             const photoData = {
                 record_id: currentRecordId,
                 item_id: itemId,
-                item_name: currentPhotoItemName,
+                item_name: itemName,
                 photo_url: photo.url,
                 thumbnail_url: photo.url, // 実装では圧縮版を作成
                 before_after: photo.beforeAfter,
-                is_cover: photo.isCover,
+                is_cover: false,
                 caption: '',
                 photographer: document.getElementById('mechanic-name')?.value || '',
                 photo_date: photo.timestamp,
@@ -611,6 +643,44 @@ async function savePhotos() {
 
             await API.createRecord('inspection_photos', photoData);
         }
+    }
+}
+
+// itemIdから項目名を取得
+function getItemNameById(itemId) {
+    const sections = ['engine', 'interior', 'undercarriage', 'bottom'];
+    
+    for (const section of sections) {
+        const items = inspectionItems[section];
+        if (!items) continue;
+        
+        for (const group of items) {
+            for (const item of group.items) {
+                if (item.id === itemId) {
+                    return item.name;
+                }
+            }
+        }
+    }
+    
+    return itemId; // 見つからない場合はIDを返す
+}
+
+// 既存の写真を削除
+async function deleteExistingPhotos(recordId) {
+    try {
+        const result = await API.getRecords('inspection_photos', { search: recordId, limit: 1000 });
+        const photos = result.data || [];
+        
+        for (const photo of photos) {
+            try {
+                await API.deleteRecord('inspection_photos', photo.id);
+            } catch (error) {
+                console.error('写真削除エラー:', error);
+            }
+        }
+    } catch (error) {
+        console.error('既存写真の取得エラー:', error);
     }
 }
 
@@ -629,8 +699,7 @@ async function loadPhotos(recordId) {
                 id: photo.id,
                 url: photo.photo_url,
                 beforeAfter: photo.before_after,
-                timestamp: photo.photo_date,
-                isCover: photo.is_cover
+                timestamp: photo.photo_date
             });
 
             // カメラボタンを更新
@@ -669,4 +738,74 @@ function generateUUID() {
 
 function generateAccessToken() {
     return Array.from({length: 32}, () => Math.floor(Math.random() * 36).toString(36)).join('');
+}
+
+// 部品追加モーダルを表示
+function showAddPartModal() {
+    document.getElementById('addPartModal').classList.add('show');
+    document.getElementById('newPartName').value = '';
+    document.getElementById('newPartUnit').value = '個';
+    setTimeout(() => {
+        document.getElementById('newPartName').focus();
+    }, 100);
+}
+
+// 部品追加モーダルを閉じる
+function closeAddPartModal() {
+    document.getElementById('addPartModal').classList.remove('show');
+}
+
+// カスタム部品を追加
+function addCustomPart() {
+    const name = document.getElementById('newPartName').value.trim();
+    const unit = document.getElementById('newPartUnit').value;
+
+    if (!name) {
+        showToast('❌ 部品名を入力してください');
+        return;
+    }
+
+    // 重複チェック
+    const exists = replacementParts.some(p => p.name === name);
+    if (exists) {
+        showToast('❌ 同じ名前の部品が既に存在します');
+        return;
+    }
+
+    // 新しい部品を追加
+    const partId = 'custom_' + Date.now();
+    replacementParts.push({
+        id: partId,
+        name: name,
+        unit: unit,
+        custom: true
+    });
+
+    // 再描画
+    renderReplacementParts();
+    closeAddPartModal();
+    showToast('✅ 部品を追加しました');
+
+    // 追加した部品の入力欄にフォーカス
+    setTimeout(() => {
+        const input = document.getElementById(partId);
+        if (input) {
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            input.focus();
+        }
+    }, 100);
+}
+
+// カスタム部品を削除
+function deleteCustomPart(partId) {
+    if (!confirm('この部品を削除してもよろしいですか？')) {
+        return;
+    }
+
+    const index = replacementParts.findIndex(p => p.id === partId);
+    if (index > -1) {
+        replacementParts.splice(index, 1);
+        renderReplacementParts();
+        showToast('🗑️ 部品を削除しました');
+    }
 }
