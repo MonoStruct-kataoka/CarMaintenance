@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>複数件登録テスト</title>
+    <style>
+        body {
+            font-family: -apple-system, 'Hiragino Kaku Gothic ProN', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: white;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .log-success {
+            color: #4CAF50;
+        }
+        .log-error {
+            color: #f44336;
+        }
+        .log-info {
+            color: #2196F3;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-card">
+        <h1>🧪 複数件登録テスト</h1>
+        <p>このページでは、整備記録システムの複数件登録機能をテストします。</p>
+        
+        <div style="margin: 20px 0;">
+            <button class="btn btn-primary" onclick="createMultipleRecords(5)">5件作成</button>
+            <button class="btn btn-primary" onclick="createMultipleRecords(10)">10件作成</button>
+            <button class="btn btn-primary" onclick="createMultipleRecords(20)">20件作成</button>
+            <button class="btn btn-secondary" onclick="loadAllRecords()">全件取得</button>
+            <button class="btn btn-danger" onclick="clearAllRecords()">全件削除</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-records">0</div>
+                <div class="stat-label">総レコード数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="success-count">0</div>
+                <div class="stat-label">作成成功</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="error-count">0</div>
+                <div class="stat-label">エラー</div>
+            </div>
+        </div>
+
+        <div class="log" id="log">
+            <div class="log-item log-info">ログが表示されます...</div>
+        </div>
+    </div>
+
+    <script src="js/api-helper.js"></script>
+    <script>
+        let successCount = 0;
+        let errorCount = 0;
+
+        // ログを追加
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const item = document.createElement('div');
+            item.className = `log-item log-${type}`;
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(item);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // 統計を更新
+        function updateStats() {
+            document.getElementById('success-count').textContent = successCount;
+            document.getElementById('error-count').textContent = errorCount;
+        }
+
+        // テストデータを生成
+        function generateTestRecord(index) {
+            const vehicles = [
+                { reg: '品川 330 あ 1234', model: 'DBA-ZRE152H', name: '株式会社テスト商事' },
+                { reg: '横浜 500 さ 5678', model: 'CBA-GRS204', name: '有限会社サンプル工業' },
+                { reg: '練馬 300 た 9012', model: 'DAA-ZVW30', name: '山田太郎' },
+                { reg: '多摩 100 な 3456', model: 'DBA-NCP131', name: '鈴木商店' },
+                { reg: '足立 800 は 7890', model: 'CBA-GE8', name: '佐藤自動車' }
+            ];
+
+            const vehicle = vehicles[index % vehicles.length];
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+
+            return {
+                client_name: `${vehicle.name} (テスト${index + 1})`,
+                registration_number: vehicle.reg,
+                car_model: vehicle.model,
+                chassis_number: `CHASSIS-${String(index + 1).padStart(6, '0')}`,
+                engine_model: `ENGINE-${String(index + 1).padStart(3, '0')}`,
+                first_registration: '令和5年4月',
+                mileage: Math.floor(Math.random() * 100000) + 10000,
+                workshop_name: '株式会社日産サティオ埼玉北 寄居サービス工場',
+                inspection_date: dateStr,
+                completion_date: dateStr,
+                mechanic_name: '田中 太郎',
+                inspection_data: JSON.stringify({
+                    engine_ps_belt: { code: '✓', timestamp: new Date().toISOString() },
+                    interior_brake_pedal: { code: '✓', timestamp: new Date().toISOString() }
+                }),
+                replacement_parts: JSON.stringify({
+                    'エンジン・オイル': '4.5 L',
+                    'オイル・フィルタ': '1 個'
+                }),
+                custom_parts: JSON.stringify([]),
+                advice: `テストデータ${index + 1}: 次回の点検時期は6ヶ月後です。`,
+                measurements: JSON.stringify({
+                    'CO濃度（アイドリング時）': '0.5 %',
+                    'タイヤ溝の深さ（前輪左）': '8.0 mm'
+                }),
+                tags: JSON.stringify(['テスト', `バッチ${Math.floor(index / 5) + 1}`]),
+                status: 'completed',
+                access_token: generateAccessToken(),
+                qr_code: `${window.location.origin}/customer.html?token=${generateAccessToken()}`
+            };
+        }
+
+        // アクセストークン生成
+        function generateAccessToken() {
+            return Array.from({length: 32}, () => 
+                Math.floor(Math.random() * 36).toString(36)
+            ).join('');
+        }
+
+        // 複数件作成
+        async function createMultipleRecords(count) {
+            addLog(`📝 ${count}件のレコード作成を開始...`, 'info');
+            successCount = 0;
+            errorCount = 0;
+            updateStats();
+
+            const startTime = Date.now();
+
+            for (let i = 0; i < count; i++) {
+                try {
+                    const testData = generateTestRecord(i);
+                    const result = await API.createRecord('maintenance_records', testData);
+                    successCount++;
+                    addLog(`✅ レコード ${i + 1}/${count} 作成成功 (ID: ${result.id.substring(0, 8)}...)`, 'success');
+                    updateStats();
+                } catch (error) {
+                    errorCount++;
+                    addLog(`❌ レコード ${i + 1}/${count} 作成失敗: ${error.message}`, 'error');
+                    updateStats();
+                }
+            }
+
+            const endTime = Date.now();
+            const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+            addLog(`🎉 作成完了: 成功 ${successCount}件, 失敗 ${errorCount}件 (所要時間: ${duration}秒)`, 'info');
+            
+            // 全件数を更新
+            await loadAllRecords();
+        }
+
+        // 全件取得
+        async function loadAllRecords() {
+            try {
+                addLog('📊 全レコードを取得中...', 'info');
+                const result = await API.getRecords('maintenance_records', { limit: 10000 });
+                const records = result.data || [];
+                document.getElementById('total-records').textContent = records.length;
+                addLog(`✅ ${records.length}件のレコードを取得しました`, 'success');
+
+                // レコードの詳細をログに表示
+                records.slice(0, 5).forEach((record, index) => {
+                    addLog(`  ${index + 1}. ${record.client_name} - ${record.registration_number}`, 'info');
+                });
+                if (records.length > 5) {
+                    addLog(`  ... 他 ${records.length - 5}件`, 'info');
+                }
+            } catch (error) {
+                addLog(`❌ 取得失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 全件削除
+        async function clearAllRecords() {
+            if (!confirm('すべてのレコードを削除しますか？\nこの操作は取り消せません。')) {
+                return;
+            }
+
+            try {
+                addLog('🗑️ 全レコードを削除中...', 'info');
+                const result = await API.getRecords('maintenance_records', { limit: 10000 });
+                const records = result.data || [];
+
+                let deletedCount = 0;
+                for (const record of records) {
+                    try {
+                        await API.deleteRecord('maintenance_records', record.id);
+                        deletedCount++;
+                    } catch (error) {
+                        addLog(`❌ 削除失敗 (ID: ${record.id}): ${error.message}`, 'error');
+                    }
+                }
+
+                addLog(`✅ ${deletedCount}件のレコードを削除しました`, 'success');
+                document.getElementById('total-records').textContent = 0;
+                successCount = 0;
+                errorCount = 0;
+                updateStats();
+            } catch (error) {
+                addLog(`❌ 削除失敗: ${error.message}`, 'error');
+            }
+        }
+
+        // 初期読み込み
+        window.addEventListener('DOMContentLoaded', () => {
+            addLog('🚀 テストページを読み込みました', 'info');
+            loadAllRecords();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>整備記録詳細 - 特定整備記録簿システム</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/view.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <div class="header">
+        <div class="header-left">
+            <button class="back-btn" onclick="location.href='search.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-title">
+                <span>📋</span>
+                <span>整備記録詳細</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="action-btn-header" onclick="editRecord()" title="編集">
+                <i class="fas fa-edit"></i>
+                <span>編集</span>
+            </button>
+            <button class="action-btn-header" onclick="generatePDF()" title="PDF出力" id="pdf-btn" style="display: none;">
+                <i class="fas fa-file-pdf"></i>
+                <span>PDF</span>
+            </button>
+            <button class="action-btn-header danger" onclick="deleteRecord()" title="削除">
+                <i class="fas fa-trash"></i>
+                <span>削除</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <!-- ステータスバー -->
+        <div class="status-bar" id="status-bar">
+            <div class="status-info">
+                <span class="status-badge" id="status-badge">-</span>
+                <span class="status-text" id="status-text">-</span>
+            </div>
+            <div class="status-date">
+                <i class="fas fa-clock"></i>
+                <span id="created-date">-</span>
+            </div>
+        </div>
+
+        <!-- 車両情報 -->
+        <div class="section-card">
+            <h2 class="section-header">🚗 車両情報</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">依頼者の氏名又は名称</span>
+                    <span class="info-value" id="client-name">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">自動車登録番号</span>
+                    <span class="info-value highlight" id="registration-number">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">車名及び型式</span>
+                    <span class="info-value" id="car-model">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">車台番号</span>
+                    <span class="info-value" id="chassis-number">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">原動機の型式</span>
+                    <span class="info-value" id="engine-model">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">初度登録年月</span>
+                    <span class="info-value" id="first-registration">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">走行距離</span>
+                    <span class="info-value" id="mileage">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 整備情報 -->
+        <div class="section-card">
+            <h2 class="section-header">🏢 整備情報</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">事業場の名称・所在地</span>
+                    <span class="info-value" id="workshop-name">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">点検の年月日</span>
+                    <span class="info-value" id="inspection-date">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">整備完了年月日</span>
+                    <span class="info-value" id="completion-date">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">整備責任者の氏名</span>
+                    <span class="info-value" id="mechanic-name">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 点検結果 -->
+        <div class="section-card">
+            <h2 class="section-header">✅ 点検結果</h2>
+            <div class="inspection-tabs">
+                <button class="inspection-tab active" onclick="switchInspectionTab('engine')">エンジンルーム</button>
+                <button class="inspection-tab" onclick="switchInspectionTab('interior')">室内点検</button>
+                <button class="inspection-tab" onclick="switchInspectionTab('undercarriage')">足廻り点検</button>
+                <button class="inspection-tab" onclick="switchInspectionTab('bottom')">下廻り点検</button>
+            </div>
+            <div class="inspection-content">
+                <div class="inspection-pane active" id="engine-pane"></div>
+                <div class="inspection-pane" id="interior-pane"></div>
+                <div class="inspection-pane" id="undercarriage-pane"></div>
+                <div class="inspection-pane" id="bottom-pane"></div>
+            </div>
+        </div>
+
+        <!-- 交換部品 -->
+        <div class="section-card" id="replacement-parts-section" style="display: none;">
+            <h2 class="section-header">🔄 主な交換部品等</h2>
+            <div class="parts-list" id="replacement-parts"></div>
+        </div>
+
+        <!-- 測定値 -->
+        <div class="section-card" id="measurements-section" style="display: none;">
+            <h2 class="section-header">📏 測定値</h2>
+            <div class="measurements-grid" id="measurements"></div>
+        </div>
+
+        <!-- メンテナンスアドバイス -->
+        <div class="section-card" id="advice-section" style="display: none;">
+            <h2 class="section-header">💡 メンテナンスに関するアドバイス</h2>
+            <div class="advice-content" id="advice"></div>
+        </div>
+
+        <!-- 写真ギャラリー -->
+        <div class="section-card" id="photos-section" style="display: none;">
+            <h2 class="section-header">📸 点検写真</h2>
+            <div class="photo-groups" id="photo-groups"></div>
+        </div>
+
+        <!-- タグ -->
+        <div class="section-card" id="tags-section" style="display: none;">
+            <h2 class="section-header">🏷️ タグ</h2>
+            <div class="tags-list" id="tags"></div>
+        </div>
+    </div>
+
+    <!-- 画像ライトボックス -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="lightbox-image" src="" alt="拡大画像">
+    </div>
+
+    <script src="js/api-helper.js"></script>
+    <script src="js/inspection-data.js"></script>
+    <script src="js/view.js"></script>
+</body>
+</html>
