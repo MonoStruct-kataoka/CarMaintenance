@@ -39,15 +39,15 @@
             </button>
             <button class="tab-btn" data-tab="engine">
                 <span class="tab-text">エンジンルーム</span>
-                <span class="tab-badge">0/5</span>
+                <span class="tab-badge">0/6</span>
             </button>
             <button class="tab-btn" data-tab="interior">
                 <span class="tab-text">室内点検</span>
-                <span class="tab-badge">0/3</span>
+                <span class="tab-badge">0/4</span>
             </button>
             <button class="tab-btn" data-tab="undercarriage">
                 <span class="tab-text">足廻り点検</span>
-                <span class="tab-badge">0/3</span>
+                <span class="tab-badge">0/4</span>
             </button>
             <button class="tab-btn" data-tab="bottom">
                 <span class="tab-text">下廻り点検</span>
@@ -159,7 +159,12 @@
             <div class="tab-content" data-content="additional">
                 <!-- 主な交換部品 -->
                 <div class="section-card">
-                    <h3 class="section-header">🔄 主な交換部品等</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 class="section-header" style="margin: 0;">🔄 主な交換部品等</h3>
+                        <button class="add-part-btn" onclick="showAddPartModal()">
+                            <i class="fas fa-plus"></i> 部品を追加
+                        </button>
+                    </div>
                     <div class="replacement-grid" id="replacement-parts"></div>
                 </div>
 
@@ -258,6 +263,44 @@
                     </button>
                 </div>
                 <div class="photo-gallery" id="photoGallery"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 部品追加モーダル -->
+    <div class="modal" id="addPartModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>部品を追加</h3>
+                <button class="modal-close" onclick="closeAddPartModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label class="input-label">部品名 <span class="required">*</span></label>
+                    <input type="text" class="input-field" id="newPartName" placeholder="例：ブレーキパッド">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">単位 <span class="required">*</span></label>
+                    <select class="input-field" id="newPartUnit">
+                        <option value="個">個</option>
+                        <option value="本">本</option>
+                        <option value="L">L</option>
+                        <option value="ml">ml</option>
+                        <option value="セット">セット</option>
+                        <option value="式">式</option>
+                        <option value="枚">枚</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 16px;">
+                    <button class="btn btn-secondary" onclick="closeAddPartModal()" style="flex: 1;">
+                        キャンセル
+                    </button>
+                    <button class="btn btn-primary" onclick="addCustomPart()" style="flex: 1;">
+                        <i class="fas fa-plus"></i> 追加
+                    </button>
+                </div>
             </div>
         </div>
     </div>
